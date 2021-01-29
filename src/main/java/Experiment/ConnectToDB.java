@@ -15,9 +15,9 @@ import org.bson.conversions.Bson;
 import org.bson.json.JsonWriterSettings;
 import org.bson.types.ObjectId;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Filters.*;
@@ -29,9 +29,18 @@ import static java.util.Arrays.asList;
 public class ConnectToDB {
     private static final Random rand = new Random();
 
-    public static void main1(String args[]) {
+    public static void main(String args[]) {
 
-        delete();
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream("twitter_api.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String bearer = properties.getProperty("twitter_bearer");
+        System.out.println(bearer);
+
+//        delete();
     }
 
     private static Document generateNewGrade(double studentId, double classId) {
@@ -186,5 +195,29 @@ public class ConnectToDB {
             System.out.println(res);
         }
     }
+
+//    public List<Integer> findSmallestSetOfVertices(int n, List<List<Integer>> edges) {
+//        List<Integer> result = new ArrayList<Integer>();
+//
+//        List<Integer> list = edges.stream().map(edge -> edge.get(1)).distinct().collect(Collectors.toList());
+//
+//        Iterator<Integer> it = list.iterator();
+//
+//        Map<Integer, Integer> mp = new TreeMap<>();
+//
+//        int i = 1;
+//        int cur = 0;
+//        while(i <= n){
+//            if(!it.hasNext()) result.add(i);
+//            else if(cur == i){
+//                cur = it.next();
+//            } else {
+//                result.add(i);
+//            }
+//            i ++;
+//        }
+//
+//        return result;
+//    }
 
 }
