@@ -14,21 +14,23 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TwitterRepo {
-    private static final String PAGINATION_TOKEN = "pagination_token";
-    private static final String PREVIOUS_TOKEN = "previous_token";
-    private static final String NEXT_TOKEN = "next_token";
-    private static final String DONE = "Done!";
-    private static final String META = "meta";
-    private static final String DATA = "data";
-    private static final String ID = "id";
-    private static final String NAME = "name";
-    private static final String USERNAME = "username";
+public interface TwitterApiEndpoint {
+    String PAGINATION_TOKEN = "pagination_token";
+    String PREVIOUS_TOKEN = "previous_token";
+    String NEXT_TOKEN = "next_token";
+    String DONE = "Done!";
+    String META = "meta";
+    String DATA = "data";
+    String ID = "id";
+    String NAME = "name";
+    String USERNAME = "username";
+    String RATE_LIMIT_MSG = "Rate limit exceeded\n";
 
-    public static User getUserById(final String userId, String bearer) {
+    static User getUserById(final String userId, String bearer) {
 
         User user = null;
         String response = null;
@@ -43,6 +45,9 @@ public class TwitterRepo {
             JSONObject jOb;
             try {
                 jOb = new JSONObject(response);
+                if (!jOb.has(DATA)) {
+                    return null;
+                }
                 jOb = jOb.getJSONObject(DATA);
             } catch (JSONException exception) {
                 exception.printStackTrace();
@@ -57,7 +62,7 @@ public class TwitterRepo {
         return user;
     }
 
-    public static User getUserByUsername(final String username, String bearer) {
+    static User getUserByUsername(final String username, String bearer) {
         User user = null;
         String response = null;
 
@@ -71,6 +76,9 @@ public class TwitterRepo {
             JSONObject jOb;
             try {
                 jOb = new JSONObject(response);
+                if (!jOb.has(DATA)) {
+                    return null;
+                }
                 jOb = jOb.getJSONObject(DATA);
             } catch (JSONException exception) {
                 exception.printStackTrace();
@@ -84,9 +92,9 @@ public class TwitterRepo {
         return user;
     }
 
-    public static List<User> getFollowers(String userId, String bearer) {
+    static List<User> getFollowers(String userId, String bearer) {
         List<User> followersAll = new ArrayList<>();
-        String token = null;
+        String token = "P7SLO3786LHHEZZZ";
 
         while (true) {
             String response;
@@ -96,17 +104,30 @@ public class TwitterRepo {
                         bearer, token, userId);
             } catch (URISyntaxException | IOException e) {
                 e.printStackTrace();
-                return null;
+                break;
             }
 
             if (response != null) {
+                if (RATE_LIMIT_MSG.equals(response)) {
+                    System.out.println(RATE_LIMIT_MSG + " Going to sleep...");
+                    try {
+                        Thread.sleep(Duration.ofMinutes(15).toMillis());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(" Waking up...");
+                    continue;
+                }
                 JSONObject obj;
                 try {
                     obj = new JSONObject(response);
                 } catch (JSONException exception) {
-                    return null;
+                    break;
                 }
                 System.out.println(response);
+                if (!obj.has(DATA)) {
+                    break;
+                }
                 JSONArray followersJSON = obj.getJSONArray(DATA);
 
                 int size = followersJSON.length();
@@ -124,13 +145,16 @@ public class TwitterRepo {
                 else
                     break;
             }
+
         }
 
         return followersAll;
     }
 
-    private static String request(String requestBody, String bearer, String paginationToken, String... params)
+    static String request(String requestBody, String bearer, String paginationToken, String... params)
             throws URISyntaxException, IOException {
+
+
         HttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom()
                         .setCookieSpec(CookieSpecs.STANDARD).build())
@@ -153,6 +177,4 @@ public class TwitterRepo {
         }
         return null;
     }
-
-
 }

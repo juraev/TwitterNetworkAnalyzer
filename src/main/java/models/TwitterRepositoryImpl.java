@@ -14,7 +14,7 @@ import java.util.List;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.*;
 
-public class TwitterRepositoryImpl implements TwitterRepository{
+public class TwitterRepositoryImpl implements TwitterRepository {
     private static final int PORT = 27017;
     private static final String HOST = "localhost";
     private static final String DATABASE_NAME = "twitter_connections";
@@ -29,7 +29,7 @@ public class TwitterRepositoryImpl implements TwitterRepository{
     }
 
     @Override
-    public int addFollower(User followee, User follower){
+    public int addFollower(User followee, User follower) {
         MongoCollection<Document> collection = mDatabase.getCollection(USER_COLLECTION_NAME);
 
         Bson filter = eq("_Id", followee.getId());
@@ -43,7 +43,7 @@ public class TwitterRepositoryImpl implements TwitterRepository{
     }
 
     @Override
-    public int addFollowers(User followee, List<User> followers){
+    public int addFollowers(User followee, List<User> followers) {
         MongoCollection<Document> collection = mDatabase.getCollection(USER_COLLECTION_NAME);
         Bson filter1 = eq("_id", followee.getId());
         Bson filter2 = eq("name", followee.getName());
@@ -57,7 +57,7 @@ public class TwitterRepositoryImpl implements TwitterRepository{
     }
 
     @Override
-    public void close(){
-        if(mDBClient != null) mDBClient.close();
+    public void close() {
+        if (mDBClient != null) mDBClient.close();
     }
 }

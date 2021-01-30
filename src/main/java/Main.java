@@ -4,7 +4,6 @@ import models.User;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -22,12 +21,15 @@ public class Main {
         }
 
         String bearer = properties.getProperty("twitter_bearer");
-        String username = properties.getProperty("main_user_username");
+        String username = properties.getProperty("starting_user_username");
 
 //        User mainUser = getUserById(MAIN_USER_ID, bearer);
-        User mainUser = TwitterRepo.getUserByUsername(username, bearer);
+        User mainUser = TwitterApiEndpoint.getUserByUsername(username, bearer);
+        if (mainUser == null) {
+            return;
+        }
 
-        List<User> users = TwitterRepo.getFollowers(mainUser.getId(), bearer);;
+        List<User> users = TwitterApiEndpoint.getFollowers(mainUser.getId(), bearer);
 
         repo.addFollowers(mainUser, users);
         repo.close();
